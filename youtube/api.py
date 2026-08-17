@@ -1,4 +1,3 @@
-```python
 """YouTube Data API integration."""
 
 from datetime import datetime
