@@ -33,7 +33,7 @@ class ScanCommand(commands.Cog):
         self,
         interaction: discord.Interaction,
         query: str,
-        limit: int = 10,
+        limit: int,
     ):
         """Search YouTube and scan comments for the given keyword."""
 
@@ -125,8 +125,8 @@ class ScanCommand(commands.Cog):
         description="Sucht YouTube-Kommentare nach Telefonnummern.",
     )
     @app_commands.describe(
-        country="Land der gesuchten Telefonnummern.",
         limit="Maximale Anzahl an Videos.",
+        country="Optional: Nur Telefonnummern dieses Landes.",
     )
     @app_commands.choices(
         country=[
@@ -149,8 +149,8 @@ class ScanCommand(commands.Cog):
     async def scan_phone(
         self,
         interaction: discord.Interaction,
-        country: app_commands.Choice[str],
-        limit: int = 10,
+        limit: int,
+        country: app_commands.Choice[str] | None = None,
     ):
         """Search YouTube comments for phone numbers."""
 
@@ -164,8 +164,10 @@ class ScanCommand(commands.Cog):
         await interaction.response.defer()
 
         try:
+            # Use a broad search so phone scanning does not depend
+            # on a specific country name.
             videos = self.youtube.search_videos(
-                query=country.name,
+                query="phone number",
                 max_results=limit,
             )
 
@@ -175,7 +177,9 @@ class ScanCommand(commands.Cog):
                 )
                 return
 
-            scanner = PhoneScanner(country_filter=country.value)
+            country_filter = country.value if country else None
+            scanner = PhoneScanner(country_filter=country_filter)
+
             results = []
 
             for video in videos:
@@ -190,9 +194,14 @@ class ScanCommand(commands.Cog):
                     if result:
                         results.append(result)
 
+            country_text = (
+                country.name if country else "🌍 Alle unterstützten Länder"
+            )
+
             if not results:
                 await interaction.followup.send(
-                    f"📱 Keine Telefonnummern für **{country.name}** gefunden.\n\n"
+                    f"📱 Keine Telefonnummern gefunden.\n\n"
+                    f"🌍 Land: **{country_text}**\n"
                     f"📺 Videos durchsucht: **{len(videos)}**"
                 )
                 return
@@ -200,7 +209,7 @@ class ScanCommand(commands.Cog):
             embed = discord.Embed(
                 title="📱 YouTube Phone Scan",
                 description=(
-                    f"Land: **{country.name}**\n"
+                    f"Land: **{country_text}**\n"
                     f"Telefonnummern: **{len(results)}**\n"
                     f"Videos: **{len(videos)}**"
                 ),
