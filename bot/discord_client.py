@@ -27,6 +27,13 @@ class DiscordBot(commands.Bot):
         """Called when the bot is ready."""
         logger.info(f"✅ Bot logged in as {self.user}")
         logger.info(f"📋 Serving {len(self.guilds)} server(s)")
+
+        try:
+            synced = await self.tree.sync()
+            logger.info(f"🔄 Synced {len(synced)} slash command(s)")
+        except Exception as e:
+            logger.error(f"❌ Failed to sync slash commands: {e}")
+
         await self.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.watching,
