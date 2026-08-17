@@ -1,0 +1,24 @@
+# Discord Bot
+discord.py==2.3.2
+
+# YouTube API
+google-api-python-client==2.100.0
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+
+# Phone Number Validation
+phonenumbers==8.13.0
+
+# Configuration
+python-dotenv==1.0.0
+
+# Logging & Utils
+python-dateutil==2.8.2
+requests==2.31.0
+
+# Development/Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.12.0
+flake8==6.1.0
+pylint==3.0.3
