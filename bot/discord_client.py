@@ -26,7 +26,6 @@ class DiscordBot(commands.Bot):
     async def setup_hook(self):
         """Load extensions before the bot connects."""
         await self.load_extension("bot.error_handler")
-        await self.load_extension("commands.scan_command")
 
     async def on_ready(self):
         """Called when the bot is ready."""
