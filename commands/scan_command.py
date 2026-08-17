@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from scanners.keyword_scanner import KeywordScanner
+from scanners.phone_scanner import PhoneScanner
 from youtube.api import YouTubeAPI
 
 
@@ -17,10 +17,10 @@ class ScanCommand(commands.Cog):
 
     @app_commands.command(
         name="scan",
-        description="Scannt YouTube-Kommentare nach einem Suchbegriff.",
+        description="Scannt YouTube-Kommentare nach Telefonnummern.",
     )
     @app_commands.describe(
-        query="Das Wort oder der Satz, nach dem gesucht werden soll.",
+        query="Suchbegriff für die YouTube-Videos.",
         limit="Maximale Anzahl an Videos.",
     )
     async def scan(
@@ -29,7 +29,7 @@ class ScanCommand(commands.Cog):
         query: str,
         limit: int = 10,
     ):
-        """Search YouTube and scan comments for the given keyword."""
+        """Search YouTube and scan comments for phone numbers."""
 
         if limit < 1 or limit > 50:
             await interaction.response.send_message(
@@ -52,7 +52,7 @@ class ScanCommand(commands.Cog):
                 )
                 return
 
-            scanner = KeywordScanner([query])
+            scanner = PhoneScanner()
             results = []
 
             for video in videos:
@@ -69,16 +69,17 @@ class ScanCommand(commands.Cog):
 
             if not results:
                 await interaction.followup.send(
-                    f"🔍 Keine Treffer für **{query}** gefunden.\n\n"
-                    f"📺 Videos durchsucht: {len(videos)}"
+                    f"📱 Keine Telefonnummern gefunden.\n\n"
+                    f"🔍 Suchbegriff: **{query}**\n"
+                    f"📺 Videos durchsucht: **{len(videos)}**"
                 )
                 return
 
             embed = discord.Embed(
-                title="🔍 YouTube Scan",
+                title="📱 YouTube Phone Scan",
                 description=(
                     f"Suchbegriff: **{query}**\n"
-                    f"Treffer: **{len(results)}**\n"
+                    f"Telefonnummern gefunden: **{len(results)}**\n"
                     f"Videos: **{len(videos)}**"
                 ),
                 color=discord.Color.blue(),
@@ -92,9 +93,10 @@ class ScanCommand(commands.Cog):
                     text = text[:197] + "..."
 
                 embed.add_field(
-                    name=f"💬 {comment.author}",
+                    name=f"📱 {comment.author}",
                     value=(
                         f"{text}\n"
+                        f"🔒 Gefunden: **{result.masked_display}**\n"
                         f"[Kommentar öffnen]({comment.url})"
                     ),
                     inline=False,
