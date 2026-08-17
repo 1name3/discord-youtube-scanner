@@ -239,5 +239,3 @@ class YouTubeAPI:
         return datetime.fromisoformat(
             value.replace("Z", "+00:00")
         )
-```
-
