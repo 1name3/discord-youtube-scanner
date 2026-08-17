@@ -28,7 +28,7 @@ class ScanCommand(commands.Cog):
 
     scan_group = app_commands.Group(
         name="scan",
-        description="Scannt YouTube-Videos und Kommentare.",
+        description="Scan YouTube videos and comments.",
     )
 
     def has_scan_permission(self, interaction: discord.Interaction) -> bool:
@@ -54,9 +54,9 @@ class ScanCommand(commands.Cog):
         """Send the permission denied message."""
 
         await interaction.response.send_message(
-            "❌ Du hast keine Berechtigung, diesen Bot direkt zu verwenden.\n\n"
-            "📨 Bitte sende deine Anfrage in **#fih-bot-requests**.\n\n"
-            "🤖 Du kannst dir auch deinen eigenen Bot bauen:\n"
+            "❌ You don't have permission to use this bot directly.\n\n"
+            "📨 Please send your request in **#fih-bot-requests**.\n\n"
+            "🤖 You can also build your own bot:\n"
             f"{GITHUB_URL}",
             ephemeral=True,
         )
@@ -117,12 +117,12 @@ class ScanCommand(commands.Cog):
 
     @scan_group.command(
         name="query",
-        description="Sucht YouTube-Kommentare nach einem Suchbegriff.",
+        description="Search YouTube comments for a keyword.",
     )
     @app_commands.describe(
-        query="Das Wort oder der Satz, nach dem gesucht werden soll.",
-        limit="Maximale Anzahl an Videos.",
-        link="Optional: Ein bestimmtes YouTube-Video.",
+        query="The word or phrase to search for.",
+        limit="Maximum number of videos to scan.",
+        link="Optional: A specific YouTube video.",
     )
     async def scan_query(
         self,
@@ -139,7 +139,7 @@ class ScanCommand(commands.Cog):
 
         if limit < 1 or limit > 50:
             await interaction.response.send_message(
-                "❌ Das Limit muss zwischen 1 und 50 liegen.",
+                "❌ The limit must be between 1 and 50.",
                 ephemeral=True,
             )
             return
@@ -154,7 +154,7 @@ class ScanCommand(commands.Cog):
 
                 if not video_id:
                     await interaction.followup.send(
-                        "❌ Der angegebene YouTube-Link ist ungültig."
+                        "❌ The provided YouTube link is invalid."
                     )
                     return
 
@@ -162,7 +162,7 @@ class ScanCommand(commands.Cog):
 
                 if not video:
                     await interaction.followup.send(
-                        "❌ Das YouTube-Video konnte nicht gefunden werden."
+                        "❌ The YouTube video could not be found."
                     )
                     return
 
@@ -177,7 +177,7 @@ class ScanCommand(commands.Cog):
 
                 if not videos:
                     await interaction.followup.send(
-                        f"🔍 Keine YouTube-Videos für **{query}** gefunden."
+                        f"🔍 No YouTube videos found for **{query}**."
                     )
                     return
 
@@ -185,15 +185,15 @@ class ScanCommand(commands.Cog):
 
             if not results:
                 description = (
-                    f"Suchbegriff: **{query}**\n"
-                    f"📺 Videos durchsucht: **{len(videos)}**"
+                    f"Search term: **{query}**\n"
+                    f"📺 Videos scanned: **{len(videos)}**"
                 )
 
                 if link:
-                    description += "\n🔗 Gezielter Videoscan"
+                    description += "\n🔗 Targeted video scan"
 
                 await interaction.followup.send(
-                    f"🔍 Keine Treffer für **{query}** gefunden.\n\n"
+                    f"🔍 No matches found for **{query}**.\n\n"
                     f"{description}"
                 )
                 return
@@ -201,8 +201,8 @@ class ScanCommand(commands.Cog):
             embed = discord.Embed(
                 title="🔍 YouTube Query Scan",
                 description=(
-                    f"Suchbegriff: **{query}**\n"
-                    f"Treffer: **{len(results)}**\n"
+                    f"Search term: **{query}**\n"
+                    f"Matches: **{len(results)}**\n"
                     f"Videos: **{len(videos)}**"
                 ),
                 color=discord.Color.blue(),
@@ -210,8 +210,8 @@ class ScanCommand(commands.Cog):
 
             if link:
                 embed.add_field(
-                    name="🔗 Modus",
-                    value="Gezieltes Video – Limit wurde ignoriert.",
+                    name="🔗 Mode",
+                    value="Targeted video – limit was ignored.",
                     inline=False,
                 )
 
@@ -226,50 +226,50 @@ class ScanCommand(commands.Cog):
                     name=f"💬 {comment.author}",
                     value=(
                         f"{text}\n"
-                        f"[Kommentar öffnen]({comment.url})"
+                        f"[Open comment]({comment.url})"
                     ),
                     inline=False,
                 )
 
             if len(results) > 10:
                 embed.set_footer(
-                    text=f"Es werden 10 von {len(results)} Treffern angezeigt."
+                    text=f"Showing 10 of {len(results)} matches."
                 )
 
             await interaction.followup.send(embed=embed)
 
         except Exception as error:
             await interaction.followup.send(
-                f"❌ Beim Scannen ist ein Fehler aufgetreten:\n"
+                f"❌ An error occurred while scanning:\n"
                 f"`{error}`",
                 ephemeral=True,
             )
 
     @scan_group.command(
         name="phone",
-        description="Sucht YouTube-Kommentare nach Telefonnummern.",
+        description="Search YouTube comments for phone numbers.",
     )
     @app_commands.describe(
-        limit="Maximale Anzahl an Videos.",
-        country="Optional: Nur Telefonnummern dieses Landes.",
-        link="Optional: Ein bestimmtes YouTube-Video.",
+        limit="Maximum number of videos to scan.",
+        country="Optional: Only phone numbers from this country.",
+        link="Optional: A specific YouTube video.",
     )
     @app_commands.choices(
         country=[
-            app_commands.Choice(name="🇦🇹 Österreich (+43)", value="AT"),
-            app_commands.Choice(name="🇩🇪 Deutschland (+49)", value="DE"),
-            app_commands.Choice(name="🇨🇭 Schweiz (+41)", value="CH"),
-            app_commands.Choice(name="🇬🇧 Vereinigtes Königreich (+44)", value="GB"),
-            app_commands.Choice(name="🇺🇸 USA/Kanada (+1)", value="US/CA"),
-            app_commands.Choice(name="🇫🇷 Frankreich (+33)", value="FR"),
-            app_commands.Choice(name="🇮🇹 Italien (+39)", value="IT"),
-            app_commands.Choice(name="🇪🇸 Spanien (+34)", value="ES"),
-            app_commands.Choice(name="🇳🇱 Niederlande (+31)", value="NL"),
-            app_commands.Choice(name="🇧🇪 Belgien (+32)", value="BE"),
-            app_commands.Choice(name="🇵🇱 Polen (+48)", value="PL"),
-            app_commands.Choice(name="🇸🇪 Schweden (+46)", value="SE"),
-            app_commands.Choice(name="🇳🇴 Norwegen (+47)", value="NO"),
-            app_commands.Choice(name="🇩🇰 Dänemark (+45)", value="DK"),
+            app_commands.Choice(name="🇦🇹 Austria (+43)", value="AT"),
+            app_commands.Choice(name="🇩🇪 Germany (+49)", value="DE"),
+            app_commands.Choice(name="🇨🇭 Switzerland (+41)", value="CH"),
+            app_commands.Choice(name="🇬🇧 United Kingdom (+44)", value="GB"),
+            app_commands.Choice(name="🇺🇸 USA/Canada (+1)", value="US/CA"),
+            app_commands.Choice(name="🇫🇷 France (+33)", value="FR"),
+            app_commands.Choice(name="🇮🇹 Italy (+39)", value="IT"),
+            app_commands.Choice(name="🇪🇸 Spain (+34)", value="ES"),
+            app_commands.Choice(name="🇳🇱 Netherlands (+31)", value="NL"),
+            app_commands.Choice(name="🇧🇪 Belgium (+32)", value="BE"),
+            app_commands.Choice(name="🇵🇱 Poland (+48)", value="PL"),
+            app_commands.Choice(name="🇸🇪 Sweden (+46)", value="SE"),
+            app_commands.Choice(name="🇳🇴 Norway (+47)", value="NO"),
+            app_commands.Choice(name="🇩🇰 Denmark (+45)", value="DK"),
         ]
     )
     async def scan_phone(
@@ -287,7 +287,7 @@ class ScanCommand(commands.Cog):
 
         if limit < 1 or limit > 50:
             await interaction.response.send_message(
-                "❌ Das Limit muss zwischen 1 und 50 liegen.",
+                "❌ The limit must be between 1 and 50.",
                 ephemeral=True,
             )
             return
@@ -303,7 +303,7 @@ class ScanCommand(commands.Cog):
 
                 if not video_id:
                     await interaction.followup.send(
-                        "❌ Der angegebene YouTube-Link ist ungültig."
+                        "❌ The provided YouTube link is invalid."
                     )
                     return
 
@@ -311,7 +311,7 @@ class ScanCommand(commands.Cog):
 
                 if not video:
                     await interaction.followup.send(
-                        "❌ Das YouTube-Video konnte nicht gefunden werden."
+                        "❌ The YouTube video could not be found."
                     )
                     return
 
@@ -325,25 +325,25 @@ class ScanCommand(commands.Cog):
 
                 if not videos:
                     await interaction.followup.send(
-                        "🔍 Keine YouTube-Videos gefunden."
+                        "🔍 No YouTube videos found."
                     )
                     return
 
             results = await self.scan_videos(videos, scanner)
 
             country_text = (
-                country.name if country else "🌍 Alle unterstützten Länder"
+                country.name if country else "🌍 All supported countries"
             )
 
             if not results:
                 message = (
-                    "📱 Keine Telefonnummern gefunden.\n\n"
-                    f"🌍 Land: **{country_text}**\n"
-                    f"📺 Videos durchsucht: **{len(videos)}**"
+                    "📱 No phone numbers found.\n\n"
+                    f"🌍 Country: **{country_text}**\n"
+                    f"📺 Videos scanned: **{len(videos)}**"
                 )
 
                 if link:
-                    message += "\n🔗 Gezielter Videoscan – Limit wurde ignoriert."
+                    message += "\n🔗 Targeted video scan – limit was ignored."
 
                 await interaction.followup.send(message)
                 return
@@ -351,8 +351,8 @@ class ScanCommand(commands.Cog):
             embed = discord.Embed(
                 title="📱 YouTube Phone Scan",
                 description=(
-                    f"Land: **{country_text}**\n"
-                    f"Telefonnummern: **{len(results)}**\n"
+                    f"Country: **{country_text}**\n"
+                    f"Phone numbers: **{len(results)}**\n"
                     f"Videos: **{len(videos)}**"
                 ),
                 color=discord.Color.green(),
@@ -360,8 +360,8 @@ class ScanCommand(commands.Cog):
 
             if link:
                 embed.add_field(
-                    name="🔗 Modus",
-                    value="Gezieltes Video – Limit wurde ignoriert.",
+                    name="🔗 Mode",
+                    value="Targeted video – limit was ignored.",
                     inline=False,
                 )
 
@@ -376,22 +376,22 @@ class ScanCommand(commands.Cog):
                     name=f"📱 {comment.author}",
                     value=(
                         f"{text}\n"
-                        f"🔒 Gefunden: **{result.masked_display}**\n"
-                        f"[Kommentar öffnen]({comment.url})"
+                        f"🔒 Found: **{result.masked_display}**\n"
+                        f"[Open comment]({comment.url})"
                     ),
                     inline=False,
                 )
 
             if len(results) > 10:
                 embed.set_footer(
-                    text=f"Es werden 10 von {len(results)} Treffern angezeigt."
+                    text=f"Showing 10 of {len(results)} matches."
                 )
 
             await interaction.followup.send(embed=embed)
 
         except Exception as error:
             await interaction.followup.send(
-                f"❌ Beim Scannen ist ein Fehler aufgetreten:\n"
+                f"❌ An error occurred while scanning:\n"
                 f"`{error}`",
                 ephemeral=True,
             )
