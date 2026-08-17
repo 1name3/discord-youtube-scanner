@@ -32,8 +32,16 @@ class DiscordBot(commands.Bot):
         logger.info(f"✅ Bot logged in as {self.user}")
         logger.info(f"📋 Serving {len(self.guilds)} server(s)")
 
+        # Copy commands to each server.
         for guild in self.guilds:
             self.tree.copy_global_to(guild=guild)
+
+        # Remove the old global slash commands.
+        self.tree.clear_commands(guild=None)
+        await self.tree.sync()
+
+        # Sync the commands specifically to each server.
+        for guild in self.guilds:
             synced = await self.tree.sync(guild=guild)
 
             logger.info(
@@ -50,13 +58,6 @@ class DiscordBot(commands.Bot):
     async def on_guild_join(self, guild: discord.Guild):
         """Called when the bot joins a guild."""
         logger.info(f"Joined guild: {guild.name} (ID: {guild.id})")
-
-        self.tree.copy_global_to(guild=guild)
-        synced = await self.tree.sync(guild=guild)
-
-        logger.info(
-            f"🔄 Synced {len(synced)} command(s) to {guild.name}"
-        )
 
     async def on_error(self, event_method: str, *args, **kwargs):
         """Called when an error occurs."""
