@@ -27,11 +27,24 @@ class PhoneScanner(BaseScanner):
         "+45": "DK",
     }
 
-    PHONE_PATTERN = re.compile(
+    # International formats such as:
+    # +43 660 1234567
+    # +49-151-12345678
+    # +1 (555) 123-4567
+    INTERNATIONAL_PATTERN = re.compile(
+        r"(?<![\d+])"
+        r"\+\d{1,3}"
+        r"(?:[\s./-]?\(?\d{1,4}\)?){2,5}"
+        r"(?!\d)"
+    )
+
+    # Common local formats such as:
+    # 0660 1234567
+    # 030 12345678
+    LOCAL_PATTERN = re.compile(
         r"(?<!\d)"
-        r"(?:\+\d{1,3}[\s./-]?)?"
-        r"(?:\(?\d{2,4}\)?[\s./-]?)"
-        r"(?:\d[\s./-]?){5,12}"
+        r"(?:0\d{2,4})"
+        r"(?:[\s./-]\d{2,4}){1,3}"
         r"(?!\d)"
     )
 
@@ -43,7 +56,17 @@ class PhoneScanner(BaseScanner):
     def scan(self, comment: YouTubeComment) -> Optional[ScanResult]:
         """Scan a comment for phone numbers."""
 
-        matches = self.PHONE_PATTERN.findall(comment.text)
+        text = comment.text
+
+        matches = []
+
+        # International numbers.
+        matches.extend(self.INTERNATIONAL_PATTERN.findall(text))
+
+        # Local numbers are only useful when a specific country
+        # is selected, because otherwise their country is ambiguous.
+        if self.country_filter:
+            matches.extend(self.LOCAL_PATTERN.findall(text))
 
         valid_numbers = []
 
@@ -87,12 +110,19 @@ class PhoneScanner(BaseScanner):
 
         digits = re.sub(r"\D", "", number)
 
-        # Phone numbers should normally contain at least 7 digits.
-        if len(digits) < 7:
+        # International phone numbers normally contain 7-15 digits.
+        if len(digits) < 7 or len(digits) > 15:
             return False
 
-        # Avoid treating extremely long numbers as phone numbers.
-        if len(digits) > 15:
+        # A phone number should contain several digits, but avoid
+        # treating a random sequence in a huge text as a phone number.
+        digit_count = sum(char.isdigit() for char in number)
+
+        if digit_count < 7:
+            return False
+
+        # Reject numbers made almost entirely from one repeated digit.
+        if len(set(digits)) <= 2:
             return False
 
         return True
