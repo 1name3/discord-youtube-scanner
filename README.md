@@ -1,101 +1,135 @@
 ````markdown name=README.md
-# Discord YouTube Scanner Bot
+<div align="center">
 
-A powerful Python-based Discord bot that scans YouTube comments for suspicious content including phone numbers, email addresses, and custom keywords.
+# 🎯 Discord YouTube Scanner Bot
 
-## ✨ Features
+**A powerful Python-based Discord bot that scans YouTube comments for suspicious content**
 
-### 🔍 Intelligent Scanners
-- **📱 Phone Number Scanner** - Detects phone numbers from 15+ countries
-- **📧 Email Scanner** - Identifies email addresses in comments
-- **🔎 Keyword Scanner** - Searches for custom keywords and phrases
-- **🌍 Multi-Country Support** - Supports AT, DE, CH, GB, US, CA, FR, IT, ES, NL, BE, PL, SE, NO, DK and more
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Discord.py](https://img.shields.io/badge/discord.py-2.0%2B-blue?style=for-the-badge&logo=discord)](https://discordpy.readthedocs.io/)
+[![License MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/1name3/discord-youtube-scanner?style=for-the-badge&logo=github)](https://github.com/1name3/discord-youtube-scanner)
 
-### 🛡️ Security & Privacy
-- **Privacy Mode** - Masks sensitive information in outputs
-- **Role-Based Access Control** - Configure who can use the bot
-- **Secure Token Management** - Credentials stored in `.env` file
-- **Audit Logging** - Track all scan operations
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [Contributing](#-contributing)
 
-### 🔧 Developer-Friendly
-- **Modular Architecture** - Easy to extend with new scanners
-- **Base Classes** - Abstract base classes for consistent implementation
-- **Comprehensive Error Handling** - Detailed error messages and recovery
-- **Detailed Logging** - Track bot operations and issues
+</div>
 
 ---
 
-## 📋 Table of Contents
+## ✨ Features
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Architecture](#architecture)
-- [Adding Custom Scanners](#adding-custom-scanners)
-- [Contributing](#contributing)
-- [License](#license)
+<table>
+<tr>
+<td width="50%">
+
+### 🔍 Intelligent Scanners
+- 📱 **Phone Number Detection** - 15+ countries
+- 📧 **Email Detection** - Find all email addresses
+- 🔎 **Keyword Scanning** - Custom pattern matching
+- 🌍 **Multi-Country Support** - AT, DE, CH, GB, US, CA, FR, IT, ES, NL, BE, PL, SE, NO, DK
+
+</td>
+<td width="50%">
+
+### 🛡️ Security & Privacy
+- 🔐 **Privacy Mode** - Mask sensitive information
+- 👥 **Role-Based Access** - Control who can scan
+- 🔑 **Secure Tokens** - Environment-based credentials
+- 📋 **Audit Logging** - Track all operations
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔧 Developer-Friendly
+- 🏗️ **Modular Architecture** - Easy to extend
+- 📦 **Base Classes** - Consistent implementations
+- ❌ **Error Handling** - Detailed messages
+- 📝 **Logging** - Track everything
+
+</td>
+<td width="50%">
+
+### ⚡ Performance
+- ⚙️ **Async/Await** - Non-blocking operations
+- 💾 **Caching** - Reduce API calls
+- 🚀 **Fast Scanning** - Efficient algorithms
+- 📊 **Rate Limiting** - Smart quota management
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📦 Prerequisites
+
+Before you begin, ensure you have:
+
+| Requirement | Version | Link |
+|---|---|---|
+| Python | 3.9+ | [Download](https://www.python.org/downloads/) |
+| Discord Bot Token | - | [Get Token](https://discord.com/developers/applications) |
+| YouTube API Key | - | [Get Key](https://console.cloud.google.com/) |
+| Git | Latest | [Download](https://git-scm.com/) |
 
 ---
 
 ## 🚀 Installation
 
-### Prerequisites
+### Step 1️⃣ - Clone Repository
 
-- **Python 3.9+** - [Download here](https://www.python.org/downloads/)
-- **Discord Bot Token** - Get it from [Discord Developer Portal](https://discord.com/developers/applications)
-- **YouTube API Key** - Get it from [Google Cloud Console](https://console.cloud.google.com/)
-- **Git** - [Download here](https://git-scm.com/)
-
-### Step-by-Step Setup
-
-**1. Clone the Repository**
 ```bash
 git clone https://github.com/1name3/discord-youtube-scanner.git
 cd discord-youtube-scanner
 ```
 
-**2. Create Virtual Environment**
+### Step 2️⃣ - Create Virtual Environment
+
+**Windows:**
 ```bash
-# Windows
 python -m venv venv
 venv\Scripts\activate
+```
 
-# macOS/Linux
+**macOS/Linux:**
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-**3. Create Environment Configuration**
+### Step 3️⃣ - Setup Environment
+
 ```bash
 cp .env.example .env
 ```
 
-**4. Configure Environment Variables**
-
 Edit `.env` and add your credentials:
 ```env
-# Required
-DISCORD_TOKEN=your_discord_bot_token_here
-YOUTUBE_API_KEY=your_youtube_api_key_here
+# 🔑 Required
+DISCORD_TOKEN=your_token_here
+YOUTUBE_API_KEY=your_key_here
 
-# Optional
+# ⚙️ Optional
 LOG_LEVEL=INFO
 BOT_PREFIX=!
 PRIVACY_MODE=true
 ```
 
-**5. Install Dependencies**
+### Step 4️⃣ - Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-**6. Run the Bot**
+### Step 5️⃣ - Start the Bot
+
 ```bash
 python main.py
 ```
 
-You should see:
+Expected output:
 ```
 ✅ Bot logged in as YourBotName#1234
 📋 Serving 2 server(s)
@@ -105,99 +139,61 @@ You should see:
 
 ## 🎯 Quick Start
 
-### Adding the Bot to Your Server
+### Add Bot to Server
 
 1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Select your application
-3. Go to **OAuth2 → URL Generator**
-4. Select scopes: `bot`
-5. Select permissions: `Send Messages`, `Embed Links`, `Read Message History`
-6. Copy the generated URL and open it in your browser
+2. Select your application → **OAuth2 → URL Generator**
+3. Select scopes: `bot`
+4. Select permissions: `Send Messages`, `Embed Links`, `Read Message History`
+5. Copy the URL and open in browser
 
 ### First Scan
-
-Once the bot is running and added to your server:
 
 ```
 /scan "python tutorial" limit:10 country:DE time_filter:7d
 ```
 
-The bot will:
-1. Search for YouTube videos matching "python tutorial"
-2. Scan comments from the top 10 results
-3. Filter to videos from Germany posted in the last 7 days
-4. Report any suspicious content found
+**What happens:**
+1. ✅ Searches for "python tutorial" videos
+2. ✅ Scans top 10 results
+3. ✅ Filters to Germany, last 7 days
+4. ✅ Reports suspicious content
 
 ---
 
-## ⚙️ Configuration
+## 📚 Usage Guide
 
-### Environment Variables
+### Commands
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DISCORD_TOKEN` | ✅ Yes | - | Your Discord bot token |
-| `YOUTUBE_API_KEY` | ✅ Yes | - | Your YouTube API key |
-| `LOG_LEVEL` | ❌ No | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
-| `BOT_PREFIX` | ❌ No | `!` | Command prefix for text commands |
-| `PRIVACY_MODE` | ❌ No | `true` | Mask sensitive data in outputs |
+#### 🔍 `/scan` - Scan YouTube Comments
 
-### Bot Configuration
-
-Edit `config.py` to customize bot behavior:
-
-```python
-class Config:
-    # Bot Settings
-    BOT_PREFIX = "!"
-    PRIVACY_MODE = True
-    
-    # API Settings
-    YOUTUBE_MAX_RESULTS = 100
-    YOUTUBE_TIMEOUT = 30
-    
-    # Scanner Settings
-    CONFIDENCE_THRESHOLD = 0.7
-    MAX_COMMENTS_PER_VIDEO = 1000
-```
-
----
-
-## 💬 Usage
-
-### Available Commands
-
-#### `/scan`
-Search YouTube and scan comments for suspicious content.
-
-**Syntax:**
 ```
 /scan <query> [limit] [country] [time_filter]
 ```
 
 **Parameters:**
-- `query` *(required)* - Search term or phrase
-- `limit` *(optional)* - Number of videos to scan (1-100, default: 10)
-- `country` *(optional)* - Country code filter (AT, DE, CH, etc., default: ALL)
-- `time_filter` *(optional)* - Time range (1h, 24h, 7d, 30d, 90d, all, default: 7d)
+| Param | Type | Default | Range | Example |
+|-------|------|---------|-------|---------|
+| query | text | - | - | `"free robux"` |
+| limit | number | 10 | 1-100 | `20` |
+| country | text | ALL | [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) | `DE`, `US` |
+| time_filter | text | 7d | `1h, 24h, 7d, 30d, 90d, all` | `24h` |
 
 **Examples:**
 ```
 /scan "cryptocurrency"
 /scan "learn discord" limit:20 country:US
-/scan "free robux" limit:5 time_filter:24h
 /scan "bitcoin" country:DE time_filter:30d
+/scan "free robux" limit:5 time_filter:24h
 ```
 
-#### `/help`
-Display help information and available commands.
+#### ℹ️ `/help` - Show Help
 
 ```
 /help
 ```
 
-#### `/stats`
-Show statistics about recent scans.
+#### 📊 `/stats` - Show Statistics
 
 ```
 /stats
@@ -212,88 +208,94 @@ Show statistics about recent scans.
 ```
 discord-youtube-scanner/
 │
-├── 📄 config.py                    # Configuration and settings
-├── 📄 main.py                      # Application entry point
-├── 📄 requirements.txt             # Python dependencies
-├── 📄 README.md                    # Documentation (you are here)
+├── 📄 config.py                    ⚙️  Configuration
+├── 📄 main.py                      🚀 Entry point
+├── 📄 requirements.txt             📦 Dependencies
+├── 📄 README.md                    📖 Documentation
 │
 ├── 🤖 bot/
-│   ├── discord_client.py          # Bot initialization and setup
-│   ├── error_handler.py           # Global error handling
+│   ├── discord_client.py          Bot setup
+│   ├── error_handler.py           Error handling
 │   └── __init__.py
 │
 ├── 📺 youtube/
-│   ├── models.py                  # Data models (Video, Comment, etc.)
-│   ├── api.py                     # YouTube API wrapper (to implement)
+│   ├── models.py                  Data models
+│   ├── api.py                     API wrapper
 │   └── __init__.py
 │
 ├── 🔍 scanners/
-│   ├── base_scanner.py            # Abstract scanner base class
-│   ├── phone_scanner.py           # Phone number detection (to implement)
-│   ├── email_scanner.py           # Email detection (to implement)
-│   ├── keyword_scanner.py         # Keyword detection (to implement)
+│   ├── base_scanner.py            Abstract base
+│   ├── phone_scanner.py           Phone numbers
+│   ├── email_scanner.py           Emails
+│   ├── keyword_scanner.py         Keywords
 │   └── __init__.py
 │
 ├── ⌨️ commands/
-│   ├── base_command.py            # Abstract command base class
-│   ├── scan_command.py            # Main scan command (to implement)
-│   ├── help_command.py            # Help command (to implement)
+│   ├── base_command.py            Abstract base
+│   ├── scan_command.py            Scan command
 │   └── __init__.py
 │
 ├── 🎨 discord_ui/
-│   ├── formatters.py              # Discord embed formatters
+│   ├── formatters.py              Embeds
 │   └── __init__.py
 │
 └── 🛠️ utils/
-    ├── logger.py                  # Logging configuration
-    ├── validators.py              # Input validation utilities
-    ├── constants.py               # Constants and static data
+    ├── logger.py                  Logging
+    ├── validators.py              Validation
+    ├── constants.py               Constants
     └── __init__.py
 ```
 
-### Architecture Diagram
+### Data Flow
 
 ```
-Discord Server
-      ↓
-┌─────────────────┐
-│  Discord Bot    │
-│  (discord_client)
-└────────┬────────┘
-         ↓
-┌─────────────────────────┐
-│   Command Handler       │
-│  (base_command.py)      │
-└────────┬────────────────┘
-         ↓
-┌──────────────────��──────┐
-│  YouTube API Integration│
-│  (youtube/api.py)       │
-└────────┬────────────────┘
-         ↓
-┌─────────────────────────┐
-│  Scanner Pipeline       │
-│  (scanners/)            │
-│  ├─ Phone Scanner       │
-│  ├─ Email Scanner       │
-│  └─ Keyword Scanner     │
-└────────┬────────────────┘
-         ↓
-┌─────────────────────────┐
-│  Result Formatting      │
-│  (discord_ui/)          │
-└────────┬────────────────┘
-         ↓
-    Discord User
+┌─────────────────────────────────────────────────────────────┐
+│                      Discord Server                         │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ↓
+        ┌────────────────────────────────┐
+        │    Discord Bot Command         │
+        │   /scan <query> <params>       │
+        └────────────┬───────────────────┘
+                     │
+                     ↓
+        ┌────────────────────────────────┐
+        │   Command Handler              │
+        │   (Validate input)             │
+        └────────────┬───────────────────┘
+                     │
+                     ↓
+        ┌────────────────────────────────┐
+        │   YouTube API Integration      │
+        │   (Fetch videos & comments)    │
+        └────────────┬───────────────────┘
+                     │
+                     ↓
+        ┌────────────────────────────────┐
+        │   Scanner Pipeline             │
+        │   ├─ Phone Scanner             │
+        │   ├─ Email Scanner             │
+        │   └─ Keyword Scanner           │
+        └────────────┬───────────────────┘
+                     │
+                     ↓
+        ┌────────────────────────────────┐
+        │   Result Formatter             │
+        │   (Create Discord Embeds)      │
+        └────────────┬───────────────────┘
+                     │
+                     ↓
+┌─────────────────────────────────────────────────────────────┐
+│              Send Results to Discord User                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔧 Adding Custom Scanners
+## 🔧 Creating Custom Scanners
 
-Creating a custom scanner is simple and follows a consistent pattern.
-
-### Example: Creating a Custom Scanner
+### Template
 
 **File: `scanners/custom_scanner.py`**
 
@@ -304,14 +306,14 @@ from typing import Optional
 import re
 
 class CustomScanner(BaseScanner):
-    """Detect custom suspicious patterns."""
+    """Your scanner description here."""
     
     def __init__(self, country_filter: Optional[str] = None):
         super().__init__(country_filter)
-        self.pattern = re.compile(r'your_pattern_here', re.IGNORECASE)
+        self.pattern = re.compile(r'your_pattern', re.IGNORECASE)
     
     def scan(self, comment: YouTubeComment) -> Optional[ScanResult]:
-        """Scan a comment for suspicious content."""
+        """Scan comment for matches."""
         matches = self.pattern.findall(comment.text)
         
         if not matches:
@@ -327,24 +329,14 @@ class CustomScanner(BaseScanner):
     
     def supports_country(self, country_code: str) -> bool:
         """Check if scanner supports country."""
-        return True  # Supported everywhere
+        return True
     
     def get_supported_countries(self) -> list:
         """Get supported countries."""
-        return []  # All countries
+        return []
 ```
 
-### Key Methods to Implement
-
-| Method | Purpose | Returns |
-|--------|---------|---------|
-| `scan()` | Analyze comment for matches | `ScanResult` or `None` |
-| `supports_country()` | Check country support | `bool` |
-| `get_supported_countries()` | List supported countries | `list` |
-
-### Registering Your Scanner
-
-In your command handler:
+### Registration
 
 ```python
 from scanners.custom_scanner import CustomScanner
@@ -355,170 +347,229 @@ result = scanner.scan(comment)
 
 ---
 
-## 📊 Output Examples
+## ⚙️ Configuration
 
-### Successful Scan
+### Environment Variables
+
+```env
+# 🔐 Required
+DISCORD_TOKEN=your_discord_bot_token_here
+YOUTUBE_API_KEY=your_youtube_api_key_here
+
+# ⚙️ Optional
+LOG_LEVEL=INFO                    # DEBUG, INFO, WARNING, ERROR
+BOT_PREFIX=!                      # Command prefix
+PRIVACY_MODE=true                 # Mask sensitive data
 ```
-🔍 PHONE TREFFER
-Kommentar
-Von: john_doe
-Looking for roommates, call me at +43 660 123456
 
-Zuversicht
-92%
+### Bot Settings (config.py)
 
-Video
-[How to find apartments in Vienna](https://youtube.com/watch?v=...)
-```
-
-### Scan Summary
-```
-📊 Zusammenfassung: 5 Treffer
-PHONE: 3 Treffer
-EMAIL: 2 Treffer
+```python
+class Config:
+    # Bot
+    BOT_PREFIX = "!"
+    PRIVACY_MODE = True
+    
+    # YouTube API
+    YOUTUBE_MAX_RESULTS = 100
+    YOUTUBE_TIMEOUT = 30
+    
+    # Scanners
+    CONFIDENCE_THRESHOLD = 0.7
+    MAX_COMMENTS_PER_VIDEO = 1000
 ```
 
 ---
 
-## 🤝 Contributing
+## 📊 Output Examples
 
-We welcome contributions! Here's how to help:
+### Single Result
+```
+🔍 PHONE DETECTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Author: john_doe
+"Looking for roommates, call +43 660 123456"
 
-### 1. Fork the Repository
-Click the "Fork" button on GitHub
-
-### 2. Create a Feature Branch
-```bash
-git checkout -b feature/your-feature-name
+Confidence: 92%
+Video: How to find apartments in Vienna
 ```
 
-### 3. Make Your Changes
-- Write clean, documented code
-- Follow the existing code style
-- Add docstrings to functions
-
-### 4. Commit Your Changes
-```bash
-git commit -m "Add feature: description of your changes"
+### Scan Summary
 ```
-
-### 5. Push to Your Fork
-```bash
-git push origin feature/your-feature-name
+📊 SCAN RESULTS: 5 Matches Found
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 Phone Numbers:    3 matches
+📧 Emails:          2 matches
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Time: 2.3s
+Videos Scanned: 10
 ```
-
-### 6. Create a Pull Request
-- Go to the original repository
-- Click "New Pull Request"
-- Describe your changes clearly
-
-### Code Style Guidelines
-
-- Use **snake_case** for variables and functions
-- Use **PascalCase** for classes
-- Add type hints where possible
-- Maximum line length: 100 characters
-- Write clear docstrings for all functions
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Bot won't start
+### ❌ Bot won't start
+
 ```
 ❌ Missing environment variable: DISCORD_TOKEN
 ```
-**Solution:** Ensure `.env` file exists and contains `DISCORD_TOKEN`
 
-### API rate limit exceeded
+**Solution:**
+- Create `.env` file in project root
+- Add all required tokens
+- Verify file is in correct location
+
+### ⚠️ API rate limit exceeded
+
 ```
 ⚠️ YouTube API quota exceeded
 ```
-**Solution:** Check your API quota at [Google Cloud Console](https://console.cloud.google.com/). Free tier has 10,000 units/day.
 
-### No results found
-```
-Keine Ergebnisse gefunden
-```
-**Solution:** 
-- Try a different search query
-- Check that your YouTube API key is valid
-- Ensure you have API quota remaining
+**Solution:**
+- Check quota at [Google Cloud Console](https://console.cloud.google.com/)
+- Free tier: 10,000 units/day
+- Upgrade plan if needed
 
-### Permission denied errors
+### 🔍 No results found
+
+**Solution:**
+- Try different search query
+- Verify YouTube API key is valid
+- Check remaining API quota
+
+### 🚫 Permission denied
+
 ```
 MissingPermissions: Missing required permissions
 ```
-**Solution:** Check bot permissions in Discord server settings. Bot needs: `Send Messages`, `Embed Links`, `Read Message History`
+
+**Solution:**
+- Go to Server Settings → Roles → Select Bot Role
+- Enable: `Send Messages`, `Embed Links`, `Read Message History`
+
+---
+
+## 🤝 Contributing
+
+### 1️⃣ Fork Repository
+Click "Fork" on GitHub
+
+### 2️⃣ Create Feature Branch
+```bash
+git checkout -b feature/amazing-feature
+```
+
+### 3️⃣ Make Changes
+```bash
+# Write clean code
+# Add docstrings
+# Follow code style
+```
+
+### 4️⃣ Commit
+```bash
+git commit -m "Add feature: description"
+```
+
+### 5️⃣ Push
+```bash
+git push origin feature/amazing-feature
+```
+
+### 6️⃣ Create Pull Request
+Describe your changes clearly
+
+### Code Style
+
+- ✅ Use `snake_case` for variables
+- ✅ Use `PascalCase` for classes
+- ✅ Add type hints
+- ✅ Max line length: 100 chars
+- ✅ Write docstrings
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**
 
-### What this means:
-- ✅ You can use it for commercial projects
-- ✅ You can modify the code
-- ✅ You can distribute it
-- ⚠️ You must include the license and copyright notice
+```
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```
+
+See [LICENSE](LICENSE) for full text.
 
 ---
 
-## 📞 Support & Contact
+## 📞 Support
 
 ### Get Help
 
-- 📝 **Issues:** [Open an issue](https://github.com/1name3/discord-youtube-scanner/issues)
-- 💬 **Discussions:** [Start a discussion](https://github.com/1name3/discord-youtube-scanner/discussions)
-- 📧 **Email:** simon.manigatterer33@gmail.com
-- 🐦 **Twitter:** [@1name3](https://twitter.com/1name3)
+| Channel | Link |
+|---------|------|
+| 📝 Issues | [Open Issue](https://github.com/1name3/discord-youtube-scanner/issues) |
+| 💬 Discussions | [Start Discussion](https://github.com/1name3/discord-youtube-scanner/discussions) |
+| 📧 Email | simon.manigatterer33@gmail.com |
+| 🐦 Twitter | [@1name3](https://twitter.com/1name3) |
 
-### Report a Security Issue
+### Security Issues
 
-Please **DO NOT** open a public issue for security vulnerabilities. Instead, email us directly.
+⚠️ **DO NOT open public issues for security vulnerabilities**
+
+Email us directly: simon.manigatterer33@gmail.com
 
 ---
 
 ## ⚖️ Legal Disclaimer
 
-This project is provided "AS IS" without any warranty. Users are responsible for:
-- Complying with YouTube's Terms of Service
-- Respecting privacy laws and regulations
-- Using the bot ethically and responsibly
-- Following Discord's Community Guidelines
+This project is provided **"AS IS"** without warranty. Users are responsible for:
+
+- ✅ Complying with YouTube Terms of Service
+- ✅ Respecting privacy laws and regulations
+- ✅ Using the bot ethically and responsibly
+- ✅ Following Discord Community Guidelines
 
 ---
 
 ## 🎉 Credits
 
-**Created with ❤️ by [1name3](https://github.com/1name3)**
+**Made with ❤️ by [1name3](https://github.com/1name3)**
 
-### Technologies Used
-- [discord.py](https://discordpy.readthedocs.io/) - Discord API wrapper
-- [google-api-python-client](https://github.com/googleapis/google-api-python-client) - YouTube API client
+### Technologies
+
+- [discord.py](https://discordpy.readthedocs.io/) - Discord API
+- [google-api-python-client](https://github.com/googleapis/google-api-python-client) - YouTube API
 - [python-dotenv](https://github.com/theskumar/python-dotenv) - Environment management
 
 ---
 
 ## 📈 Roadmap
 
-- [ ] Phone number scanner implementation
-- [ ] Email scanner implementation
-- [ ] Keyword scanner implementation
-- [ ] Database for storing scan results
-- [ ] Web dashboard for statistics
-- [ ] Advanced filtering options
-- [ ] Webhook integrations
-- [ ] Multi-language support
+- [ ] 📱 Phone number scanner
+- [ ] 📧 Email scanner
+- [ ] 🔑 Keyword scanner
+- [ ] 💾 Database storage
+- [ ] 🌐 Web dashboard
+- [ ] 🔌 Webhook integrations
+- [ ] 🌍 Multi-language support
+- [ ] ⚡ Performance optimizations
 
 ---
 
 <div align="center">
 
-**[⬆ back to top](#discord-youtube-scanner-bot)**
+### ⭐ Found this helpful? Star us on GitHub!
+
+[⬆ Back to Top](#-discord-youtube-scanner-bot)
 
 Made with 💜 for the Discord community
+
+**[Issues](https://github.com/1name3/discord-youtube-scanner/issues)** • **[Discussions](https://github.com/1name3/discord-youtube-scanner/discussions)** • **[Contact](mailto:simon.manigatterer33@gmail.com)**
 
 </div>
 ````
