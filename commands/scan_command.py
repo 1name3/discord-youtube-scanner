@@ -1,6 +1,5 @@
 """Slash commands for scanning YouTube comments."""
 
-import re
 from urllib.parse import urlparse, parse_qs
 
 import discord
@@ -17,6 +16,84 @@ OWNER_SERVER_ID = 1413581933635440652
 ALLOWED_ROLE_ID = 1539025362325995680
 
 GITHUB_URL = "https://github.com/1name3/discord-youtube-scanner"
+
+
+class ResultsView(discord.ui.View):
+    """Pagination controls for scan results."""
+
+    def __init__(
+        self,
+        results,
+        embed_builder,
+        *,
+        timeout: float = 300,
+    ):
+        super().__init__(timeout=timeout)
+
+        self.results = results
+        self.embed_builder = embed_builder
+        self.page = 0
+        self.per_page = 10
+
+        self.previous_button = discord.ui.Button(
+            label="← Previous",
+            style=discord.ButtonStyle.secondary,
+        )
+        self.next_button = discord.ui.Button(
+            label="Next →",
+            style=discord.ButtonStyle.primary,
+        )
+
+        self.previous_button.callback = self.previous_page
+        self.next_button.callback = self.next_page
+
+        self.add_item(self.previous_button)
+        self.add_item(self.next_button)
+
+        self.update_buttons()
+
+    @property
+    def total_pages(self):
+        """Return the total number of pages."""
+        return max(
+            1,
+            (len(self.results) + self.per_page - 1)
+            // self.per_page,
+        )
+
+    def update_buttons(self):
+        """Enable or disable pagination buttons."""
+        self.previous_button.disabled = self.page == 0
+        self.next_button.disabled = self.page >= self.total_pages - 1
+
+    async def previous_page(self, interaction: discord.Interaction):
+        """Show the previous page."""
+        if self.page > 0:
+            self.page -= 1
+
+        self.update_buttons()
+
+        await interaction.response.edit_message(
+            embed=self.embed_builder(self.page),
+            view=self,
+        )
+
+    async def next_page(self, interaction: discord.Interaction):
+        """Show the next page."""
+        if self.page < self.total_pages - 1:
+            self.page += 1
+
+        self.update_buttons()
+
+        await interaction.response.edit_message(
+            embed=self.embed_builder(self.page),
+            view=self,
+        )
+
+    async def on_timeout(self):
+        """Disable the buttons when the view expires."""
+        self.previous_button.disabled = True
+        self.next_button.disabled = True
 
 
 class ScanCommand(commands.Cog):
@@ -67,18 +144,15 @@ class ScanCommand(commands.Cog):
         try:
             parsed = urlparse(url)
 
-            # youtube.com/watch?v=VIDEO_ID
             if parsed.hostname in ("youtube.com", "www.youtube.com"):
                 if parsed.path == "/watch":
                     video_id = parse_qs(parsed.query).get("v")
                     if video_id:
                         return video_id[0]
 
-                # youtube.com/shorts/VIDEO_ID
                 if parsed.path.startswith("/shorts/"):
                     return parsed.path.split("/shorts/")[1].split("/")[0]
 
-            # youtu.be/VIDEO_ID
             if parsed.hostname == "youtu.be":
                 return parsed.path.strip("/").split("/")[0]
 
@@ -114,6 +188,133 @@ class ScanCommand(commands.Cog):
                     results.append(result)
 
         return results
+
+    def build_query_embed(
+        self,
+        results,
+        videos,
+        query,
+        page,
+        link=False,
+    ):
+        """Build an embed for a query scan page."""
+
+        per_page = 10
+        total_pages = max(
+            1,
+            (len(results) + per_page - 1)
+            // per_page,
+        )
+
+        start = page * per_page
+        end = min(start + per_page, len(results))
+
+        embed = discord.Embed(
+            title="🔍 YouTube Query Scan",
+            description=(
+                f"Search term: **{query}**\n"
+                f"Matches: **{len(results)}**\n"
+                f"Videos: **{len(videos)}**"
+            ),
+            color=discord.Color.blue(),
+        )
+
+        if link:
+            embed.add_field(
+                name="🔗 Mode",
+                value="Targeted video – limit was ignored.",
+                inline=False,
+            )
+
+        for result in results[start:end]:
+            comment = result.comment
+
+            text = comment.text
+            if len(text) > 200:
+                text = text[:197] + "..."
+
+            embed.add_field(
+                name=f"💬 {comment.author}",
+                value=(
+                    f"{text}\n"
+                    f"[Open comment]({comment.url})"
+                ),
+                inline=False,
+            )
+
+        embed.set_footer(
+            text=(
+                f"Page {page + 1}/{total_pages} • "
+                f"Showing {start + 1}–{end} of "
+                f"{len(results)} matches."
+            )
+        )
+
+        return embed
+
+    def build_phone_embed(
+        self,
+        results,
+        videos,
+        country_text,
+        page,
+        link=False,
+    ):
+        """Build an embed for a phone scan page."""
+
+        per_page = 10
+        total_pages = max(
+            1,
+            (len(results) + per_page - 1)
+            // per_page,
+        )
+
+        start = page * per_page
+        end = min(start + per_page, len(results))
+
+        embed = discord.Embed(
+            title="📱 YouTube Phone Scan",
+            description=(
+                f"Country: **{country_text}**\n"
+                f"Phone numbers: **{len(results)}**\n"
+                f"Videos: **{len(videos)}**"
+            ),
+            color=discord.Color.green(),
+        )
+
+        if link:
+            embed.add_field(
+                name="🔗 Mode",
+                value="Targeted video – limit was ignored.",
+                inline=False,
+            )
+
+        for result in results[start:end]:
+            comment = result.comment
+
+            text = comment.text
+            if len(text) > 200:
+                text = text[:197] + "..."
+
+            embed.add_field(
+                name=f"📱 {comment.author}",
+                value=(
+                    f"{text}\n"
+                    f"🔒 Found: **{result.masked_display}**\n"
+                    f"[Open comment]({comment.url})"
+                ),
+                inline=False,
+            )
+
+        embed.set_footer(
+            text=(
+                f"Page {page + 1}/{total_pages} • "
+                f"Showing {start + 1}–{end} of "
+                f"{len(results)} matches."
+            )
+        )
+
+        return embed
 
     @scan_group.command(
         name="query",
@@ -167,7 +368,6 @@ class ScanCommand(commands.Cog):
                     return
 
                 videos = [video]
-                results = await self.scan_videos(videos, scanner)
 
             else:
                 videos = self.youtube.search_videos(
@@ -181,7 +381,7 @@ class ScanCommand(commands.Cog):
                     )
                     return
 
-                results = await self.scan_videos(videos, scanner)
+            results = await self.scan_videos(videos, scanner)
 
             if not results:
                 description = (
@@ -198,45 +398,21 @@ class ScanCommand(commands.Cog):
                 )
                 return
 
-            embed = discord.Embed(
-                title="🔍 YouTube Query Scan",
-                description=(
-                    f"Search term: **{query}**\n"
-                    f"Matches: **{len(results)}**\n"
-                    f"Videos: **{len(videos)}**"
+            view = ResultsView(
+                results,
+                lambda page: self.build_query_embed(
+                    results,
+                    videos,
+                    query,
+                    page,
+                    link=bool(link),
                 ),
-                color=discord.Color.blue(),
             )
 
-            if link:
-                embed.add_field(
-                    name="🔗 Mode",
-                    value="Targeted video – limit was ignored.",
-                    inline=False,
-                )
-
-            for result in results[:10]:
-                comment = result.comment
-
-                text = comment.text
-                if len(text) > 200:
-                    text = text[:197] + "..."
-
-                embed.add_field(
-                    name=f"💬 {comment.author}",
-                    value=(
-                        f"{text}\n"
-                        f"[Open comment]({comment.url})"
-                    ),
-                    inline=False,
-                )
-
-            if len(results) > 10:
-                embed.set_footer(
-                    text=f"Showing 10 of {len(results)} matches."
-                )
-
-            await interaction.followup.send(embed=embed)
+            await interaction.followup.send(
+                embed=view.embed_builder(0),
+                view=view if len(results) > 10 else None,
+            )
 
         except Exception as error:
             await interaction.followup.send(
@@ -348,46 +524,21 @@ class ScanCommand(commands.Cog):
                 await interaction.followup.send(message)
                 return
 
-            embed = discord.Embed(
-                title="📱 YouTube Phone Scan",
-                description=(
-                    f"Country: **{country_text}**\n"
-                    f"Phone numbers: **{len(results)}**\n"
-                    f"Videos: **{len(videos)}**"
+            view = ResultsView(
+                results,
+                lambda page: self.build_phone_embed(
+                    results,
+                    videos,
+                    country_text,
+                    page,
+                    link=bool(link),
                 ),
-                color=discord.Color.green(),
             )
 
-            if link:
-                embed.add_field(
-                    name="🔗 Mode",
-                    value="Targeted video – limit was ignored.",
-                    inline=False,
-                )
-
-            for result in results[:10]:
-                comment = result.comment
-
-                text = comment.text
-                if len(text) > 200:
-                    text = text[:197] + "..."
-
-                embed.add_field(
-                    name=f"📱 {comment.author}",
-                    value=(
-                        f"{text}\n"
-                        f"🔒 Found: **{result.masked_display}**\n"
-                        f"[Open comment]({comment.url})"
-                    ),
-                    inline=False,
-                )
-
-            if len(results) > 10:
-                embed.set_footer(
-                    text=f"Showing 10 of {len(results)} matches."
-                )
-
-            await interaction.followup.send(embed=embed)
+            await interaction.followup.send(
+                embed=view.embed_builder(0),
+                view=view if len(results) > 10 else None,
+            )
 
         except Exception as error:
             await interaction.followup.send(
