@@ -1,3 +1,4 @@
+```python
 """YouTube Data API integration."""
 
 from datetime import datetime
@@ -90,6 +91,59 @@ class YouTubeAPI:
         except HttpError as e:
             raise RuntimeError(
                 f"YouTube API error while searching videos: {e}"
+            ) from e
+
+    def get_video(
+        self,
+        video_id: str,
+    ) -> Optional[YouTubeVideo]:
+        """Get a single YouTube video by its ID."""
+        try:
+            response = self.youtube.videos().list(
+                part="snippet,statistics",
+                id=video_id,
+            ).execute()
+
+            items = response.get("items", [])
+
+            if not items:
+                return None
+
+            item = items[0]
+            snippet = item.get("snippet", {})
+            statistics = item.get("statistics", {})
+
+            published_at = self._parse_datetime(
+                snippet.get("publishedAt")
+            )
+
+            return YouTubeVideo(
+                video_id=item["id"],
+                title=snippet.get("title", ""),
+                channel_name=snippet.get("channelTitle", ""),
+                published_at=published_at,
+                url=f"https://www.youtube.com/watch?v={item['id']}",
+                thumbnail_url=(
+                    snippet.get("thumbnails", {})
+                    .get("high", {})
+                    .get("url")
+                ),
+                comment_count=int(
+                    statistics.get("commentCount", 0)
+                ),
+                view_count=int(
+                    statistics.get("viewCount", 0)
+                ),
+                like_count=(
+                    int(statistics["likeCount"])
+                    if "likeCount" in statistics
+                    else None
+                ),
+            )
+
+        except HttpError as e:
+            raise RuntimeError(
+                f"YouTube API error while getting video: {e}"
             ) from e
 
     def get_comments(
@@ -186,3 +240,5 @@ class YouTubeAPI:
         return datetime.fromisoformat(
             value.replace("Z", "+00:00")
         )
+```
+
