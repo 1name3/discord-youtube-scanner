@@ -1,4 +1,4 @@
-````markdown name=README.md
+markdown name=README.md
 <div align="center">
 
 # 🎯 Discord YouTube Scanner Bot
@@ -572,4 +572,3 @@ Made with 💜 for the Discord community
 **[Issues](https://github.com/1name3/discord-youtube-scanner/issues)** • **[Discussions](https://github.com/1name3/discord-youtube-scanner/discussions)** • **[Contact](mailto:simon.manigatterer33@gmail.com)**
 
 </div>
-````
