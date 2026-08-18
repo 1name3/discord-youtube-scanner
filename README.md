@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎯 Discord YouTube Scanner Bot
+# Fih🥀 Bot
 
 **A powerful Python-based Discord bot that scans YouTube comments for suspicious content**
 
