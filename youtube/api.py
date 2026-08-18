@@ -26,24 +26,22 @@ class YouTubeAPI:
         query: Optional[str] = None,
         max_results: int = 10,
     ) -> List[YouTubeVideo]:
-        """Search YouTube for videos.
+        """Search YouTube for videos."""
 
-        If query is None or empty, videos are selected without a
-        keyword search. This is useful for scanners that need to
-        inspect comments independently of the video title.
-        """
         try:
-            request = self.youtube.search().list(
-                part="snippet",
-                type="video",
-                maxResults=min(max_results, 50),
-                order="date",
-            )
+            search_parameters = {
+                "part": "snippet",
+                "type": "video",
+                "maxResults": min(max_results, 50),
+                "order": "date",
+            }
 
             if query:
-                request = request.q(query)
+                search_parameters["q"] = query
 
-            response = request.execute()
+            response = self.youtube.search().list(
+                **search_parameters
+            ).execute()
 
             video_ids = [
                 item["id"]["videoId"]
@@ -73,19 +71,31 @@ class YouTubeAPI:
                     YouTubeVideo(
                         video_id=item["id"],
                         title=snippet.get("title", ""),
-                        channel_name=snippet.get("channelTitle", ""),
+                        channel_name=snippet.get(
+                            "channelTitle",
+                            "",
+                        ),
                         published_at=published_at,
-                        url=f"https://www.youtube.com/watch?v={item['id']}",
+                        url=(
+                            "https://www.youtube.com/watch?v="
+                            f"{item['id']}"
+                        ),
                         thumbnail_url=(
                             snippet.get("thumbnails", {})
                             .get("high", {})
                             .get("url")
                         ),
                         comment_count=int(
-                            statistics.get("commentCount", 0)
+                            statistics.get(
+                                "commentCount",
+                                0,
+                            )
                         ),
                         view_count=int(
-                            statistics.get("viewCount", 0)
+                            statistics.get(
+                                "viewCount",
+                                0,
+                            )
                         ),
                         like_count=(
                             int(statistics["likeCount"])
@@ -99,7 +109,8 @@ class YouTubeAPI:
 
         except HttpError as e:
             raise RuntimeError(
-                f"YouTube API error while searching videos: {e}"
+                "YouTube API error while searching videos: "
+                f"{e}"
             ) from e
 
     def get_video(
@@ -107,6 +118,7 @@ class YouTubeAPI:
         video_id: str,
     ) -> Optional[YouTubeVideo]:
         """Get a single YouTube video by its ID."""
+
         try:
             response = self.youtube.videos().list(
                 part="snippet,statistics",
@@ -129,19 +141,31 @@ class YouTubeAPI:
             return YouTubeVideo(
                 video_id=item["id"],
                 title=snippet.get("title", ""),
-                channel_name=snippet.get("channelTitle", ""),
+                channel_name=snippet.get(
+                    "channelTitle",
+                    "",
+                ),
                 published_at=published_at,
-                url=f"https://www.youtube.com/watch?v={item['id']}",
+                url=(
+                    "https://www.youtube.com/watch?v="
+                    f"{item['id']}"
+                ),
                 thumbnail_url=(
                     snippet.get("thumbnails", {})
                     .get("high", {})
                     .get("url")
                 ),
                 comment_count=int(
-                    statistics.get("commentCount", 0)
+                    statistics.get(
+                        "commentCount",
+                        0,
+                    )
                 ),
                 view_count=int(
-                    statistics.get("viewCount", 0)
+                    statistics.get(
+                        "viewCount",
+                        0,
+                    )
                 ),
                 like_count=(
                     int(statistics["likeCount"])
@@ -152,7 +176,8 @@ class YouTubeAPI:
 
         except HttpError as e:
             raise RuntimeError(
-                f"YouTube API error while getting video: {e}"
+                "YouTube API error while getting video: "
+                f"{e}"
             ) from e
 
     def get_comments(
@@ -161,6 +186,7 @@ class YouTubeAPI:
         max_results: int = 100,
     ) -> List[YouTubeComment]:
         """Get top-level comments from a YouTube video."""
+
         comments = []
 
         try:
@@ -172,12 +198,18 @@ class YouTubeAPI:
             ).execute()
 
             for item in response.get("items", []):
-                comment = item.get("snippet", {}).get(
+                comment = item.get(
+                    "snippet",
+                    {},
+                ).get(
                     "topLevelComment",
                     {},
                 )
 
-                snippet = comment.get("snippet", {})
+                snippet = comment.get(
+                    "snippet",
+                    {},
+                )
 
                 published_at = self._parse_datetime(
                     snippet.get("publishedAt")
@@ -203,7 +235,7 @@ class YouTubeAPI:
                         video_id=video.video_id,
                         video_title=video.title,
                         url=(
-                            f"https://www.youtube.com/watch?v="
+                            "https://www.youtube.com/watch?v="
                             f"{video.video_id}"
                             f"&lc={comment_id}"
                         ),
@@ -214,16 +246,24 @@ class YouTubeAPI:
                             )
                         ),
                         reply_count=int(
-                            item.get("snippet", {}).get(
+                            item.get(
+                                "snippet",
+                                {},
+                            ).get(
                                 "totalReplyCount",
                                 0,
                             )
                         ),
-                        author_id=snippet.get(
-                            "authorChannelId",
-                            {}).get("value")
-                        if snippet.get("authorChannelId")
-                        else None,
+                        author_id=(
+                            snippet.get(
+                                "authorChannelId",
+                                {},
+                            ).get("value")
+                            if snippet.get(
+                                "authorChannelId"
+                            )
+                            else None
+                        ),
                     )
                 )
 
@@ -238,12 +278,16 @@ class YouTubeAPI:
                 ) from e
 
             raise RuntimeError(
-                f"YouTube API error while getting comments: {e}"
+                "YouTube API error while getting comments: "
+                f"{e}"
             ) from e
 
     @staticmethod
-    def _parse_datetime(value: Optional[str]) -> datetime:
+    def _parse_datetime(
+        value: Optional[str],
+    ) -> datetime:
         """Convert a YouTube ISO timestamp to a datetime."""
+
         if not value:
             return datetime.now()
 
