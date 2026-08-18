@@ -23,24 +23,17 @@ class YouTubeAPI:
 
     def search_videos(
         self,
-        query: Optional[str] = None,
+        query: str,
         max_results: int = 10,
     ) -> List[YouTubeVideo]:
-        """Search YouTube for videos."""
+        """Search YouTube for videos matching a query."""
 
         try:
-            search_parameters = {
-                "part": "snippet",
-                "type": "video",
-                "maxResults": min(max_results, 50),
-                "order": "date",
-            }
-
-            if query:
-                search_parameters["q"] = query
-
             response = self.youtube.search().list(
-                **search_parameters
+                part="snippet",
+                q=query,
+                type="video",
+                maxResults=min(max_results, 50),
             ).execute()
 
             video_ids = [
@@ -77,7 +70,7 @@ class YouTubeAPI:
                         ),
                         published_at=published_at,
                         url=(
-                            "https://www.youtube.com/watch?v="
+                            f"https://www.youtube.com/watch?v="
                             f"{item['id']}"
                         ),
                         thumbnail_url=(
@@ -109,8 +102,7 @@ class YouTubeAPI:
 
         except HttpError as e:
             raise RuntimeError(
-                "YouTube API error while searching videos: "
-                f"{e}"
+                f"YouTube API error while searching videos: {e}"
             ) from e
 
     def get_video(
@@ -147,7 +139,7 @@ class YouTubeAPI:
                 ),
                 published_at=published_at,
                 url=(
-                    "https://www.youtube.com/watch?v="
+                    f"https://www.youtube.com/watch?v="
                     f"{item['id']}"
                 ),
                 thumbnail_url=(
@@ -176,8 +168,7 @@ class YouTubeAPI:
 
         except HttpError as e:
             raise RuntimeError(
-                "YouTube API error while getting video: "
-                f"{e}"
+                f"YouTube API error while getting video: {e}"
             ) from e
 
     def get_comments(
@@ -235,7 +226,7 @@ class YouTubeAPI:
                         video_id=video.video_id,
                         video_title=video.title,
                         url=(
-                            "https://www.youtube.com/watch?v="
+                            f"https://www.youtube.com/watch?v="
                             f"{video.video_id}"
                             f"&lc={comment_id}"
                         ),
@@ -278,8 +269,7 @@ class YouTubeAPI:
                 ) from e
 
             raise RuntimeError(
-                "YouTube API error while getting comments: "
-                f"{e}"
+                f"YouTube API error while getting comments: {e}"
             ) from e
 
     @staticmethod
