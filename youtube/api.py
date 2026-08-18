@@ -23,17 +23,27 @@ class YouTubeAPI:
 
     def search_videos(
         self,
-        query: str,
+        query: Optional[str] = None,
         max_results: int = 10,
     ) -> List[YouTubeVideo]:
-        """Search YouTube for videos matching a query."""
+        """Search YouTube for videos.
+
+        If query is None or empty, videos are selected without a
+        keyword search. This is useful for scanners that need to
+        inspect comments independently of the video title.
+        """
         try:
-            response = self.youtube.search().list(
+            request = self.youtube.search().list(
                 part="snippet",
-                q=query,
                 type="video",
                 maxResults=min(max_results, 50),
-            ).execute()
+                order="date",
+            )
+
+            if query:
+                request = request.q(query)
+
+            response = request.execute()
 
             video_ids = [
                 item["id"]["videoId"]
@@ -163,7 +173,8 @@ class YouTubeAPI:
 
             for item in response.get("items", []):
                 comment = item.get("snippet", {}).get(
-                    "topLevelComment", {}
+                    "topLevelComment",
+                    {},
                 )
 
                 snippet = comment.get("snippet", {})
