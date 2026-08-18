@@ -39,6 +39,7 @@ class ResultsView(discord.ui.View):
             label="← Previous",
             style=discord.ButtonStyle.secondary,
         )
+
         self.next_button = discord.ui.Button(
             label="Next →",
             style=discord.ButtonStyle.primary,
@@ -108,7 +109,10 @@ class ScanCommand(commands.Cog):
         description="Scan YouTube videos and comments.",
     )
 
-    def has_scan_permission(self, interaction: discord.Interaction) -> bool:
+    def has_scan_permission(
+        self,
+        interaction: discord.Interaction,
+    ) -> bool:
         """Check whether the user is allowed to use the scanner."""
 
         # On every other server, everyone can use the bot.
@@ -144,17 +148,29 @@ class ScanCommand(commands.Cog):
         try:
             parsed = urlparse(url)
 
-            if parsed.hostname in ("youtube.com", "www.youtube.com"):
+            if parsed.hostname in (
+                "youtube.com",
+                "www.youtube.com",
+            ):
                 if parsed.path == "/watch":
-                    video_id = parse_qs(parsed.query).get("v")
+                    video_id = parse_qs(
+                        parsed.query
+                    ).get("v")
+
                     if video_id:
                         return video_id[0]
 
                 if parsed.path.startswith("/shorts/"):
-                    return parsed.path.split("/shorts/")[1].split("/")[0]
+                    return (
+                        parsed.path
+                        .split("/shorts/")[1]
+                        .split("/")[0]
+                    )
 
             if parsed.hostname == "youtu.be":
-                return parsed.path.strip("/").split("/")[0]
+                return parsed.path.strip(
+                    "/"
+                ).split("/")[0]
 
         except Exception:
             pass
@@ -200,6 +216,7 @@ class ScanCommand(commands.Cog):
         """Build an embed for a query scan page."""
 
         per_page = 10
+
         total_pages = max(
             1,
             (len(results) + per_page - 1)
@@ -207,7 +224,10 @@ class ScanCommand(commands.Cog):
         )
 
         start = page * per_page
-        end = min(start + per_page, len(results))
+        end = min(
+            start + per_page,
+            len(results),
+        )
 
         embed = discord.Embed(
             title="🔍 YouTube Query Scan",
@@ -222,7 +242,10 @@ class ScanCommand(commands.Cog):
         if link:
             embed.add_field(
                 name="🔗 Mode",
-                value="Targeted video – limit was ignored.",
+                value=(
+                    "Targeted video – "
+                    "limit was ignored."
+                ),
                 inline=False,
             )
 
@@ -230,6 +253,7 @@ class ScanCommand(commands.Cog):
             comment = result.comment
 
             text = comment.text
+
             if len(text) > 200:
                 text = text[:197] + "..."
 
@@ -263,6 +287,7 @@ class ScanCommand(commands.Cog):
         """Build an embed for a phone scan page."""
 
         per_page = 10
+
         total_pages = max(
             1,
             (len(results) + per_page - 1)
@@ -270,7 +295,10 @@ class ScanCommand(commands.Cog):
         )
 
         start = page * per_page
-        end = min(start + per_page, len(results))
+        end = min(
+            start + per_page,
+            len(results),
+        )
 
         embed = discord.Embed(
             title="📱 YouTube Phone Scan",
@@ -285,7 +313,10 @@ class ScanCommand(commands.Cog):
         if link:
             embed.add_field(
                 name="🔗 Mode",
-                value="Targeted video – limit was ignored.",
+                value=(
+                    "Targeted video – "
+                    "limit was ignored."
+                ),
                 inline=False,
             )
 
@@ -293,6 +324,7 @@ class ScanCommand(commands.Cog):
             comment = result.comment
 
             text = comment.text
+
             if len(text) > 200:
                 text = text[:197] + "..."
 
@@ -318,7 +350,9 @@ class ScanCommand(commands.Cog):
 
     @scan_group.command(
         name="query",
-        description="Search YouTube comments for a keyword.",
+        description=(
+            "Search YouTube comments for a keyword."
+        ),
     )
     @app_commands.describe(
         query="The word or phrase to search for.",
@@ -377,11 +411,15 @@ class ScanCommand(commands.Cog):
 
                 if not videos:
                     await interaction.followup.send(
-                        f"🔍 No YouTube videos found for **{query}**."
+                        f"🔍 No YouTube videos found for "
+                        f"**{query}**."
                     )
                     return
 
-            results = await self.scan_videos(videos, scanner)
+            results = await self.scan_videos(
+                videos,
+                scanner,
+            )
 
             if not results:
                 description = (
@@ -390,10 +428,13 @@ class ScanCommand(commands.Cog):
                 )
 
                 if link:
-                    description += "\n🔗 Targeted video scan"
+                    description += (
+                        "\n🔗 Targeted video scan"
+                    )
 
                 await interaction.followup.send(
-                    f"🔍 No matches found for **{query}**.\n\n"
+                    f"🔍 No matches found for "
+                    f"**{query}**.\n\n"
                     f"{description}"
                 )
                 return
@@ -416,37 +457,84 @@ class ScanCommand(commands.Cog):
 
         except Exception as error:
             await interaction.followup.send(
-                f"❌ An error occurred while scanning:\n"
+                "❌ An error occurred while scanning:\n"
                 f"`{error}`",
                 ephemeral=True,
             )
 
     @scan_group.command(
         name="phone",
-        description="Search YouTube comments for phone numbers.",
+        description=(
+            "Search YouTube comments for phone numbers."
+        ),
     )
     @app_commands.describe(
         limit="Maximum number of videos to scan.",
-        country="Optional: Only phone numbers from this country.",
+        country=(
+            "Optional: Only phone numbers "
+            "from this country."
+        ),
         link="Optional: A specific YouTube video.",
     )
     @app_commands.choices(
         country=[
-            app_commands.Choice(name="🇦🇹 Austria (+43)", value="AT"),
-            app_commands.Choice(name="🇩🇪 Germany (+49)", value="DE"),
-            app_commands.Choice(name="🇨🇭 Switzerland (+41)", value="CH"),
-            app_commands.Choice(name="🇬🇧 United Kingdom (+44)", value="GB"),
-            app_commands.Choice(name="🇺🇸 USA/Canada (+1)", value="US/CA"),
-            app_commands.Choice(name="🇫🇷 France (+33)", value="FR"),
-            app_commands.Choice(name="🇮🇹 Italy (+39)", value="IT"),
-            app_commands.Choice(name="🇪🇸 Spain (+34)", value="ES"),
-            app_commands.Choice(name="🇳🇱 Netherlands (+31)", value="NL"),
-            app_commands.Choice(name="🇧🇪 Belgium (+32)", value="BE"),
-            app_commands.Choice(name="🇵🇱 Poland (+48)", value="PL"),
-            app_commands.Choice(name="🇸🇪 Sweden (+46)", value="SE"),
-            app_commands.Choice(name="🇳🇴 Norway (+47)", value="NO"),
-            app_commands.Choice(name="🇩🇰 Denmark (+45)", value="DK"),
-        ]
+            app_commands.Choice(
+                name="🇦🇹 Austria (+43)",
+                value="AT",
+            ),
+            app_commands.Choice(
+                name="🇩🇪 Germany (+49)",
+                value="DE",
+            ),
+            app_commands.Choice(
+                name="🇨🇭 Switzerland (+41)",
+                value="CH",
+            ),
+            app_commands.Choice(
+                name="🇬🇧 United Kingdom (+44)",
+                value="GB",
+            ),
+            app_commands.Choice(
+                name="🇺🇸 USA/Canada (+1)",
+                value="US/CA",
+            ),
+            app_commands.Choice(
+                name="🇫🇷 France (+33)",
+                value="FR",
+            ),
+            app_commands.Choice(
+                name="🇮🇹 Italy (+39)",
+                value="IT",
+            ),
+            app_commands.Choice(
+                name="🇪🇸 Spain (+34)",
+                value="ES",
+            ),
+            app_commands.Choice(
+                name="🇳🇱 Netherlands (+31)",
+                value="NL",
+            ),
+            app_commands.Choice(
+                name="🇧🇪 Belgium (+32)",
+                value="BE",
+            ),
+            app_commands.Choice(
+                name="🇵🇱 Poland (+48)",
+                value="PL",
+            ),
+            app_commands.Choice(
+                name="🇸🇪 Sweden (+46)",
+                value="SE",
+            ),
+            app_commands.Choice(
+                name="🇳🇴 Norway (+47)",
+                value="NO",
+            ),
+            app_commands.Choice(
+                name="🇩🇰 Denmark (+45)",
+                value="DK",
+            ),
+        ],
     )
     async def scan_phone(
         self,
@@ -471,15 +559,24 @@ class ScanCommand(commands.Cog):
         await interaction.response.defer()
 
         try:
-            country_filter = country.value if country else None
-            scanner = PhoneScanner(country_filter=country_filter)
+            country_filter = (
+                country.value
+                if country
+                else None
+            )
+
+            scanner = PhoneScanner(
+                country_filter=country_filter
+            )
 
             if link:
+                # Direct video scan.
                 video_id = self.extract_video_id(link)
 
                 if not video_id:
                     await interaction.followup.send(
-                        "❌ The provided YouTube link is invalid."
+                        "❌ The provided YouTube link "
+                        "is invalid."
                     )
                     return
 
@@ -487,17 +584,53 @@ class ScanCommand(commands.Cog):
 
                 if not video:
                     await interaction.followup.send(
-                        "❌ The YouTube video could not be found."
+                        "❌ The YouTube video could "
+                        "not be found."
                     )
                     return
 
                 videos = [video]
 
             else:
-                videos = self.youtube.search_videos(
-                    query="phone number",
-                    max_results=limit,
-                )
+                # Search using several broad terms instead
+                # of only searching for "phone number".
+                search_queries = [
+                    "contact",
+                    "call me",
+                    "text me",
+                    "WhatsApp",
+                    "Instagram",
+                    "Discord",
+                    "DM me",
+                ]
+
+                videos = []
+                seen_video_ids = set()
+
+                for search_query in search_queries:
+                    if len(videos) >= limit:
+                        break
+
+                    remaining = limit - len(videos)
+
+                    found_videos = (
+                        self.youtube.search_videos(
+                            query=search_query,
+                            max_results=remaining,
+                        )
+                    )
+
+                    for video in found_videos:
+                        if video.video_id in seen_video_ids:
+                            continue
+
+                        seen_video_ids.add(
+                            video.video_id
+                        )
+                        videos.append(video)
+
+                        if len(videos) >= limit:
+                            break
 
                 if not videos:
                     await interaction.followup.send(
@@ -505,10 +638,15 @@ class ScanCommand(commands.Cog):
                     )
                     return
 
-            results = await self.scan_videos(videos, scanner)
+            results = await self.scan_videos(
+                videos,
+                scanner,
+            )
 
             country_text = (
-                country.name if country else "🌍 All supported countries"
+                country.name
+                if country
+                else "🌍 All supported countries"
             )
 
             if not results:
@@ -519,9 +657,14 @@ class ScanCommand(commands.Cog):
                 )
 
                 if link:
-                    message += "\n🔗 Targeted video scan – limit was ignored."
+                    message += (
+                        "\n🔗 Targeted video scan – "
+                        "limit was ignored."
+                    )
 
-                await interaction.followup.send(message)
+                await interaction.followup.send(
+                    message
+                )
                 return
 
             view = ResultsView(
@@ -542,7 +685,7 @@ class ScanCommand(commands.Cog):
 
         except Exception as error:
             await interaction.followup.send(
-                f"❌ An error occurred while scanning:\n"
+                "❌ An error occurred while scanning:\n"
                 f"`{error}`",
                 ephemeral=True,
             )
