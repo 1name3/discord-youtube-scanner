@@ -1,4 +1,3 @@
-markdown name=README.md
 <div align="center">
 
 # 🎯 Discord YouTube Scanner Bot
@@ -514,14 +513,6 @@ See [LICENSE](LICENSE) for full text.
 |---------|------|
 | 📝 Issues | [Open Issue](https://github.com/1name3/discord-youtube-scanner/issues) |
 | 💬 Discussions | [Start Discussion](https://github.com/1name3/discord-youtube-scanner/discussions) |
-| 📧 Email | simon.manigatterer33@gmail.com |
-| 🐦 Twitter | [@1name3](https://twitter.com/1name3) |
-
-### Security Issues
-
-⚠️ **DO NOT open public issues for security vulnerabilities**
-
-Email us directly: simon.manigatterer33@gmail.com
 
 ---
 
@@ -533,18 +524,6 @@ This project is provided **"AS IS"** without warranty. Users are responsible for
 - ✅ Respecting privacy laws and regulations
 - ✅ Using the bot ethically and responsibly
 - ✅ Following Discord Community Guidelines
-
----
-
-## 🎉 Credits
-
-**Made with ❤️ by [1name3](https://github.com/1name3)**
-
-### Technologies
-
-- [discord.py](https://discordpy.readthedocs.io/) - Discord API
-- [google-api-python-client](https://github.com/googleapis/google-api-python-client) - YouTube API
-- [python-dotenv](https://github.com/theskumar/python-dotenv) - Environment management
 
 ---
 
@@ -566,8 +545,6 @@ This project is provided **"AS IS"** without warranty. Users are responsible for
 ### ⭐ Found this helpful? Star us on GitHub!
 
 [⬆ Back to Top](#-discord-youtube-scanner-bot)
-
-Made with 💜 for the Discord community
 
 **[Issues](https://github.com/1name3/discord-youtube-scanner/issues)** • **[Discussions](https://github.com/1name3/discord-youtube-scanner/discussions)** • **[Contact](mailto:simon.manigatterer33@gmail.com)**
 
