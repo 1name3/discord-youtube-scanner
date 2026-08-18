@@ -65,10 +65,16 @@ class ResultsView(discord.ui.View):
     def update_buttons(self):
         """Enable or disable pagination buttons."""
         self.previous_button.disabled = self.page == 0
-        self.next_button.disabled = self.page >= self.total_pages - 1
+        self.next_button.disabled = (
+            self.page >= self.total_pages - 1
+        )
 
-    async def previous_page(self, interaction: discord.Interaction):
+    async def previous_page(
+        self,
+        interaction: discord.Interaction,
+    ):
         """Show the previous page."""
+
         if self.page > 0:
             self.page -= 1
 
@@ -79,8 +85,12 @@ class ResultsView(discord.ui.View):
             view=self,
         )
 
-    async def next_page(self, interaction: discord.Interaction):
+    async def next_page(
+        self,
+        interaction: discord.Interaction,
+    ):
         """Show the next page."""
+
         if self.page < self.total_pages - 1:
             self.page += 1
 
@@ -93,6 +103,7 @@ class ResultsView(discord.ui.View):
 
     async def on_timeout(self):
         """Disable the buttons when the view expires."""
+
         self.previous_button.disabled = True
         self.next_button.disabled = True
 
@@ -168,9 +179,11 @@ class ScanCommand(commands.Cog):
                     )
 
             if parsed.hostname == "youtu.be":
-                return parsed.path.strip(
-                    "/"
-                ).split("/")[0]
+                return (
+                    parsed.path
+                    .strip("/")
+                    .split("/")[0]
+                )
 
         except Exception:
             pass
@@ -243,8 +256,7 @@ class ScanCommand(commands.Cog):
             embed.add_field(
                 name="🔗 Mode",
                 value=(
-                    "Targeted video – "
-                    "limit was ignored."
+                    "Targeted video – limit was ignored."
                 ),
                 inline=False,
             )
@@ -314,8 +326,7 @@ class ScanCommand(commands.Cog):
             embed.add_field(
                 name="🔗 Mode",
                 value=(
-                    "Targeted video – "
-                    "limit was ignored."
+                    "Targeted video – limit was ignored."
                 ),
                 inline=False,
             )
@@ -350,9 +361,7 @@ class ScanCommand(commands.Cog):
 
     @scan_group.command(
         name="query",
-        description=(
-            "Search YouTube comments for a keyword."
-        ),
+        description="Search YouTube comments for a keyword.",
     )
     @app_commands.describe(
         query="The word or phrase to search for.",
@@ -428,13 +437,10 @@ class ScanCommand(commands.Cog):
                 )
 
                 if link:
-                    description += (
-                        "\n🔗 Targeted video scan"
-                    )
+                    description += "\n🔗 Targeted video scan"
 
                 await interaction.followup.send(
-                    f"🔍 No matches found for "
-                    f"**{query}**.\n\n"
+                    f"🔍 No matches found for **{query}**.\n\n"
                     f"{description}"
                 )
                 return
@@ -450,10 +456,15 @@ class ScanCommand(commands.Cog):
                 ),
             )
 
-            await interaction.followup.send(
-                embed=view.embed_builder(0),
-                view=view if len(results) > 10 else None,
-            )
+            if len(results) > 10:
+                await interaction.followup.send(
+                    embed=view.embed_builder(0),
+                    view=view,
+                )
+            else:
+                await interaction.followup.send(
+                    embed=view.embed_builder(0),
+                )
 
         except Exception as error:
             await interaction.followup.send(
@@ -471,8 +482,7 @@ class ScanCommand(commands.Cog):
     @app_commands.describe(
         limit="Maximum number of videos to scan.",
         country=(
-            "Optional: Only phone numbers "
-            "from this country."
+            "Optional: Only phone numbers from this country."
         ),
         link="Optional: A specific YouTube video.",
     )
@@ -566,17 +576,15 @@ class ScanCommand(commands.Cog):
             )
 
             scanner = PhoneScanner(
-                country_filter=country_filter
+                country_filter=country_filter,
             )
 
             if link:
-                # Direct video scan.
                 video_id = self.extract_video_id(link)
 
                 if not video_id:
                     await interaction.followup.send(
-                        "❌ The provided YouTube link "
-                        "is invalid."
+                        "❌ The provided YouTube link is invalid."
                     )
                     return
 
@@ -584,53 +592,17 @@ class ScanCommand(commands.Cog):
 
                 if not video:
                     await interaction.followup.send(
-                        "❌ The YouTube video could "
-                        "not be found."
+                        "❌ The YouTube video could not be found."
                     )
                     return
 
                 videos = [video]
 
             else:
-                # Search using several broad terms instead
-                # of only searching for "phone number".
-                search_queries = [
-                    "contact",
-                    "call me",
-                    "text me",
-                    "WhatsApp",
-                    "Instagram",
-                    "Discord",
-                    "DM me",
-                ]
-
-                videos = []
-                seen_video_ids = set()
-
-                for search_query in search_queries:
-                    if len(videos) >= limit:
-                        break
-
-                    remaining = limit - len(videos)
-
-                    found_videos = (
-                        self.youtube.search_videos(
-                            query=search_query,
-                            max_results=remaining,
-                        )
-                    )
-
-                    for video in found_videos:
-                        if video.video_id in seen_video_ids:
-                            continue
-
-                        seen_video_ids.add(
-                            video.video_id
-                        )
-                        videos.append(video)
-
-                        if len(videos) >= limit:
-                            break
+                videos = self.youtube.search_videos(
+                    query="phone number",
+                    max_results=limit,
+                )
 
                 if not videos:
                     await interaction.followup.send(
@@ -662,9 +634,7 @@ class ScanCommand(commands.Cog):
                         "limit was ignored."
                     )
 
-                await interaction.followup.send(
-                    message
-                )
+                await interaction.followup.send(message)
                 return
 
             view = ResultsView(
@@ -678,10 +648,15 @@ class ScanCommand(commands.Cog):
                 ),
             )
 
-            await interaction.followup.send(
-                embed=view.embed_builder(0),
-                view=view if len(results) > 10 else None,
-            )
+            if len(results) > 10:
+                await interaction.followup.send(
+                    embed=view.embed_builder(0),
+                    view=view,
+                )
+            else:
+                await interaction.followup.send(
+                    embed=view.embed_builder(0),
+                )
 
         except Exception as error:
             await interaction.followup.send(
@@ -693,4 +668,7 @@ class ScanCommand(commands.Cog):
 
 async def setup(bot: commands.Bot):
     """Load the scan command."""
-    await bot.add_cog(ScanCommand(bot))
+
+    await bot.add_cog(
+        ScanCommand(bot)
+    )
